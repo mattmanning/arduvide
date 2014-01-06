@@ -1,5 +1,6 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <LedControl.h>
 
 // Data wire is plugged into pin 2 on the Arduino
 #define ONE_WIRE_BUS 2
@@ -13,9 +14,19 @@ DallasTemperature sensors(&oneWire);
 
 float current_temperature, set_temperature, diff, threshold;
 
+/*
+ * Create a new LedControl.
+ * Pin 12 is connected to the DATA IN-pin of the MAX7221
+ * Pin 11 is connected to the CLK-pin of the MAX7221
+ * Pin 10 is connected to the LOAD(/CS)-pin of the MAX7221
+ * There will only be a single MAX7221 attached to the arduino
+ */
+LedControl led_control=LedControl(12,11,10,1);
+
+
 void setup(void)
 {
-  set_temperature = 80.0;
+  set_temperature = 100;
   threshold = 1.0;
 
   pinMode(POWER_SWITCH, OUTPUT);
@@ -23,15 +34,29 @@ void setup(void)
 
   // start serial port
   Serial.begin(9600);
-  Serial.println("Dallas Temperature IC Control Library Demo");
 
-  // Start up the library
-  sensors.begin(); // IC Default 9 bit. If you have troubles consider upping it 12. Ups the delay giving the IC more time to process the temperature measurement
+  // Start up the temperature sensor
+  sensors.begin();
+
+  // Take the LED driver out of power save mode
+  led_control.shutdown(0,false);
 }
 
+// Display the given temperature on the 3-digit 7-segment display
+void displayTemp(int temp) {
+  led_control.setDigit(0, 0, (byte)(temp / 100), false);
+  led_control.setDigit(0, 1, (byte)((temp / 10) % 10), false);
+  led_control.setDigit(0, 2, (byte)(temp % 10), false);
+  return;
+}
 
 void loop(void)
-{   
+{
+  // Read the pot value and scale it to an int from 100 to 202.
+  set_temperature = ((analogRead(0) / 10) + 100);
+  Serial.println(set_temperature);
+  displayTemp(set_temperature);
+
   // call sensors.requestTemperatures() to issue a global temperature 
   // request to all devices on the bus
   Serial.print("Requesting temperatures...");
