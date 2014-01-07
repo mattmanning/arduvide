@@ -32,9 +32,6 @@ void setup(void)
   pinMode(POWER_SWITCH, OUTPUT);
   digitalWrite(POWER_SWITCH, LOW);
 
-  // start serial port
-  Serial.begin(9600);
-
   // Start up the temperature sensor
   sensors.begin();
 
@@ -54,18 +51,10 @@ void loop(void)
 {
   // Read the pot value and scale it to an int from 100 to 202.
   set_temperature = ((analogRead(0) / 10) + 100);
-  Serial.println(set_temperature);
   displayTemp(set_temperature);
 
-  // call sensors.requestTemperatures() to issue a global temperature 
-  // request to all devices on the bus
-  Serial.print("Requesting temperatures...");
   sensors.requestTemperatures(); // Send the command to get temperatures
   current_temperature = sensors.getTempFByIndex(0);
-  Serial.println("DONE");
-
-  Serial.print("Temperature for Device 1 is: ");
-  Serial.println(current_temperature);
 
   diff = current_temperature - set_temperature;
 
