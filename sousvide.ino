@@ -47,15 +47,12 @@ void displayTemp(int temp) {
   return;
 }
 
-void loop(void)
-{
-  // Read the pot value and scale it to an int from 100 to 202.
-  set_temperature = ((analogRead(0) / 10) + 100);
-  displayTemp(set_temperature);
-
+void readThermometer() {
   sensors.requestTemperatures(); // Send the command to get temperatures
   current_temperature = sensors.getTempFByIndex(0);
+}
 
+void switchOutput() {
   diff = current_temperature - set_temperature;
 
   // Do nothing if the temperature difference is outside our threshold.
@@ -70,6 +67,16 @@ void loop(void)
     // Turn the power off.
     digitalWrite(POWER_SWITCH, LOW);
   }
+}
+
+void loop(void)
+{
+  // Read the pot value and scale it to an int from 100 to 202.
+  set_temperature = ((analogRead(0) / 10) + 100);
+  displayTemp(set_temperature);
+
+  readThermometer();
+  switchOutput();
 }
 
 
