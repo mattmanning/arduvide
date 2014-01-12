@@ -5,6 +5,7 @@
 // Data wire is plugged into pin 2 on the Arduino
 #define ONE_WIRE_BUS 2
 #define POWER_SWITCH 7
+#define POT_TIMEOUT 3000
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 OneWire oneWire(ONE_WIRE_BUS);
@@ -13,6 +14,7 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
 float current_temperature, set_temperature, diff, threshold;
+int pot_time;
 
 /*
  * Create a new LedControl.
@@ -28,6 +30,7 @@ void setup(void)
 {
   set_temperature = 100;
   threshold = 1.0;
+  pot_time = -POT_TIMEOUT;
 
   pinMode(POWER_SWITCH, OUTPUT);
   digitalWrite(POWER_SWITCH, LOW);
@@ -69,14 +72,36 @@ void switchOutput() {
   }
 }
 
+// Read the potentiometer value from the ADC and calculate temperature
+// from it. If it's different, set the set_temperature to it and reset
+// the pot timeout.
+void readPot() {
+  int new_temperature = ((analogRead(0) / 10) + 100);
+  if (new_temperature != set_temperature) {
+    pot_time = millis();
+    set_temperature = new_temperature;
+  }
+}
+
+// Returns true if the temperature is being changed.
+// Returns false if it's been at least timeout ms since the temperature
+// was changed.
+boolean pot_timer(int timeout) {
+  (pot_time + timeout) > millis();
+}
+
+
 void loop(void)
 {
   // Read the pot value and scale it to an int from 100 to 202.
-  set_temperature = ((analogRead(0) / 10) + 100);
-  displayTemp(set_temperature);
-
-  readThermometer();
-  switchOutput();
+  readPot();
+  if (pot_timer(POT_TIMEOUT)) {
+    displayTemp(set_temperature);
+  } else {
+    readThermometer();
+    displayTemp(current_temperature);
+    switchOutput();
+  }
 }
 
 
