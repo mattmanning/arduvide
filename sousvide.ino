@@ -7,20 +7,21 @@
 #define POWER_SWITCH 7
 #define POT_TIMEOUT 2000
 
-// Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
+// Setup a oneWire instance to communicate with any OneWire devices
 OneWire oneWire(ONE_WIRE_BUS);
 
-// Pass our oneWire reference to Dallas Temperature. 
+// Pass oneWire reference to Dallas Temperature.
 DallasTemperature sensors(&oneWire);
 
+// Global variables
 float current_temperature, set_temperature, diff, threshold, pot_value;
 int pot_time;
 
 /*
  * Create a new LedControl.
- * Pin 12 is connected to the DATA IN-pin of the MAX7221
- * Pin 11 is connected to the CLK-pin of the MAX7221
- * Pin 10 is connected to the LOAD(/CS)-pin of the MAX7221
+ * Pin 12 is connected to the DATA IN-pin of the MAX7219
+ * Pin 11 is connected to the CLK-pin of the MAX7219
+ * Pin 10 is connected to the LOAD(/CS)-pin of the MAX7219
  * There will only be a single MAX7221 attached to the arduino
  */
 LedControl led_control=LedControl(12,11,10,1);
@@ -28,10 +29,12 @@ LedControl led_control=LedControl(12,11,10,1);
 
 void setup(void)
 {
+  // Set defaults
   set_temperature = 100;
   threshold = 1.0;
   pot_time = -POT_TIMEOUT;
 
+  // Set up the relay output and turn it off initially
   pinMode(POWER_SWITCH, OUTPUT);
   digitalWrite(POWER_SWITCH, LOW);
 
@@ -51,11 +54,14 @@ void displayTemp(int temp) {
   return;
 }
 
+// Get the temperature reading in degrees F
 void readThermometer() {
   sensors.requestTemperatures(); // Send the command to get temperatures
   current_temperature = sensors.getTempFByIndex(0);
 }
 
+// Implements a simple thermostat state machine to switch the relay
+// based on the state and the temperature reading.
 void switchOutput() {
   diff = current_temperature - set_temperature;
 
@@ -92,7 +98,6 @@ void readPot() {
 boolean pot_timer(int timeout) {
   return((pot_time + timeout) > millis());
 }
-
 
 void loop(void)
 {
