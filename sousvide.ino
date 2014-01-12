@@ -40,6 +40,7 @@ void setup(void)
 
   // Take the LED driver out of power save mode
   led_control.shutdown(0,false);
+  led_control.setIntensity(0, 15);
 }
 
 // Display the given temperature on the 3-digit 7-segment display
