@@ -5,7 +5,7 @@
 // Data wire is plugged into pin 2 on the Arduino
 #define ONE_WIRE_BUS 2
 #define POWER_SWITCH 7
-#define POT_TIMEOUT 3000
+#define POT_TIMEOUT 2000
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
 OneWire oneWire(ONE_WIRE_BUS);
