@@ -13,7 +13,7 @@ OneWire oneWire(ONE_WIRE_BUS);
 // Pass our oneWire reference to Dallas Temperature. 
 DallasTemperature sensors(&oneWire);
 
-float current_temperature, set_temperature, diff, threshold;
+float current_temperature, set_temperature, diff, threshold, pot_value;
 int pot_time;
 
 /*
@@ -77,7 +77,9 @@ void switchOutput() {
 // from it. If it's different, set the set_temperature to it and reset
 // the pot timeout.
 void readPot() {
-  int new_temperature = ((analogRead(0) / 10) + 100);
+  int new_pot_value = analogRead(0);
+  pot_value = (0.7 * new_pot_value + 0.3 * pot_value);
+  int new_temperature = ((pot_value / 10) + 100);
   if (new_temperature != set_temperature) {
     pot_time = millis();
     set_temperature = new_temperature;
