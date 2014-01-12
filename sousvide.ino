@@ -87,13 +87,12 @@ void readPot() {
 // Returns false if it's been at least timeout ms since the temperature
 // was changed.
 boolean pot_timer(int timeout) {
-  (pot_time + timeout) > millis();
+  return((pot_time + timeout) > millis());
 }
 
 
 void loop(void)
 {
-  // Read the pot value and scale it to an int from 100 to 202.
   readPot();
   if (pot_timer(POT_TIMEOUT)) {
     displayTemp(set_temperature);
